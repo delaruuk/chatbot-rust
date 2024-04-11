@@ -116,7 +116,7 @@ cfg_if! {
             let (send_inference, mut recieve_inference) = mpsc::channel(100);
 
             let mdl: Arc<Llama> = model.into_inner().clone();
-            let sess = Arc::new(Mutex::new(session));
+            let sess = Arc::new(Mutex::<Session>::new(session));
             let sess_cloned = sess.clone();
             actix_rt::spawn(async move {
                 let (send_new_user_message, recieve_new_user_message) =
