@@ -10,7 +10,14 @@ async fn main() -> std::io::Result<()> {
     let conf = get_configuration(None).await.unwrap();
     let addr = conf.leptos_options.site_addr;
     // Generate the list of routes in your Leptos App
-    let routes = generate_route_list(App);
+    let routes = generate_route_list(|cx| view!{ cx, <App/> });
+
+    #[get("/style.css")]
+    async fn css() -> impl Responder {
+        actix_files::NamedFile::open_async("./style/output.css").await
+    }
+
+    let model = web::Data::new(get_language_model());
     println!("listening on http://{}", &addr);
 
     HttpServer::new(move || {
@@ -18,6 +25,8 @@ async fn main() -> std::io::Result<()> {
         let site_root = &leptos_options.site_root;
 
         App::new()
+            .app_data(model.clone())
+            .services(css)
             // serve JS/WASM/CSS from `pkg`
             .service(Files::new("/pkg", format!("{site_root}/pkg")))
             // serve other assets from the `assets` directory
@@ -42,7 +51,18 @@ cfg_if! {
 
         fn get_language_model() -> Llama {
             use std::path::PathBuf;
-        }
+            dotenv()).ok();
+            let model_path = env::var("MODEL_PATH").expect("MODEL_PATH must be set")
+
+            llm::load::<LLama>(
+                &PathBuf::from(model_path),
+                llm::TokenizerSource::Embedded,
+                Default::default(),
+                llm::load_progress_callback_stdout,
+        )
+        .unwrap_or_else(|err| {
+            panic!("Error loading language model: {:?}", err);}
+        })
     }
 }
 #[cfg(feature = "ssr")]
