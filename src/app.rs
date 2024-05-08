@@ -1,6 +1,7 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
+use futures::stream::SplitSink;
 use leptos::*;
 use leptos_meta::*;
 
@@ -21,8 +22,6 @@ pub fn App() -> impl IntoView {
 
     let (conversation, set_conversation) = create_signal(Conversation::new());
 
-    use futures_util::stream::SplitSink;
-    use futures::stream::SplitSink;
     use gloo_net::websocket::futures::WebSocket;
     use gloo_net::websocket::Message::Text as Txt;
     use futures::{SinkExt, StreamExt};
@@ -93,7 +92,7 @@ pub fn App() -> impl IntoView {
         <Stylesheet id="leptos" href="/pkg/rusty_llama.css"/>
 
         // sets the document title
-        <Title text="Chatbot Help"/>
+        <Title text="Rusty Llama"/>
         <ChatArea conversation/>
         <TypeArea send/>
     }

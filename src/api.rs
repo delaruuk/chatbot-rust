@@ -2,8 +2,8 @@ use cfg_if::cfg_if;
 
 cfg_if! {
     if #[cfg(feature = "ssr")] {
-        static CHARACTER_NAME: &str = "### Procom Assistant";
-        static USER_NAME: &str = "### Homeowner";
+        static CHARACTER_NAME: &str = "### Procom";
+        static USER_NAME: &str = "### Customer";
 
         use std::convert::Infallible;
         use actix_web::web;
@@ -45,11 +45,11 @@ cfg_if! {
         }
 
         fn session_setup(model: Arc<Llama>) -> llm::InferenceSession {
-            let persona = "An individual with technical support in regards to smart home.";
+            let persona = "A chat between a human and an technician.";
             let history = format!(
                 "{CHARACTER_NAME}:Hello - How may I help you today?\n\
-                {USER_NAME}:My smart device isn't connect to my wi-fi I change my wi-fi name so I am unsure what i did wrong?\n\
-                {CHARACTER_NAME}:Certainly can help it seems you changed your wi-fi so now your devices need to reconnect to your new wi-fi.\n"
+                {USER_NAME}:I have an issue with my smart home devices not connecting to Wi-Fi, I changed Wi-Fi name recently?\n\
+                {CHARACTER_NAME}:So the issue is that your smart devices are still connecting to your old Wi-Fi you will need to change it to your new one.\n"
             );
 
             let mut session = model.start_session(Default::default());
@@ -116,7 +116,7 @@ cfg_if! {
             let (send_inference, mut recieve_inference) = mpsc::channel(100);
 
             let mdl: Arc<Llama> = model.into_inner().clone();
-            let sess = Arc::new(Mutex::<Session>::new(session));
+            let sess = Arc::new(Mutex::new(session));
             let sess_cloned = sess.clone();
             actix_rt::spawn(async move {
                 let (send_new_user_message, recieve_new_user_message) =
